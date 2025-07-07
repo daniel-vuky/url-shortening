@@ -8,7 +8,7 @@ import (
 )
 
 type IURL interface {
-	CreateURL(requestParam *models.CreateURLRequest) models.CreateURLResponse
+	CreateURL(requestParam *models.CreateURLRequest) (models.CreateURLResponse, error)
 	GetURL(shortenCode string) (string, error)
 	GetURLStats(shortenCode string) models.URLStats
 	DeleteURL(userID string, shortenCode string) error
@@ -18,13 +18,13 @@ type IURL interface {
 
 type URLService struct {
 	querier   postgres.Querier
-	shortener utils.IShortener
+	shortener utils.Shortener
 	config    *config.Config
 }
 
 // NewService
 // Init new service
-func NewService(querier postgres.Querier, shortener utils.IShortener, config *config.Config) *URLService {
+func NewUrlService(querier postgres.Querier, shortener utils.Shortener, config *config.Config) *URLService {
 	return &URLService{
 		querier:   querier,
 		shortener: shortener,
@@ -32,8 +32,8 @@ func NewService(querier postgres.Querier, shortener utils.IShortener, config *co
 	}
 }
 
-func (s *URLService) CreateURL(requestParam *models.CreateURLRequest) models.CreateURLResponse {
-	return models.CreateURLResponse{}
+func (s *URLService) CreateURL(requestParam *models.CreateURLRequest) (models.CreateURLResponse, error) {
+	return models.CreateURLResponse{}, nil
 }
 
 func (s *URLService) GetURL(shortenCode string) (string, error) {
@@ -44,7 +44,7 @@ func (s *URLService) GetURLStats(shortenCode string) models.URLStats {
 	return models.URLStats{}
 }
 
-func (s *URLService) DeleteURL(shortenCode string) error {
+func (s *URLService) DeleteURL(userID string, shortenCode string) error {
 	return nil
 }
 

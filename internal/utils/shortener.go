@@ -1,4 +1,8 @@
 package utils
 
-type IShortener interface {
+type Shortener struct {
+}
+
+func NewShortener() *Shortener {
+	return &Shortener{}
 }
