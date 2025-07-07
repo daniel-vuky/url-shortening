@@ -20,7 +20,7 @@ type URL struct {
 
 type CreateURLRequest struct {
 	OriginalURL string     `json:"original_url"`
-	CustomCode  string     `json:"custom_code"`
+	ShortCode   string     `json:"short_code,omitempty"`
 	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
 	UserID      *string    `json:"user_id,omitempty"`
 }

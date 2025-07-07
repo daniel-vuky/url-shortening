@@ -10,6 +10,17 @@ type Config struct {
 	Server struct {
 		Port int `yaml:"port"`
 	}
+	Database struct {
+		Type     string `yaml:"type"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		DBName   string `yaml:"db_name"`
+		SSLMode  string `yaml:"ssl_mode"`
+		MaxConns int32  `yaml:"max_conns"`
+		MinConns int32  `yaml:"min_conns"`
+	}
 }
 
 // LoadConfig loads the config from the env.yaml file

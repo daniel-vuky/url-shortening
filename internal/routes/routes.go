@@ -41,7 +41,7 @@ func (r *Router) GetMux() *http.ServeMux {
 	return r.mux
 }
 
-func InitRoutes() *Router {
+func InitRoutes(handler *handlers.Handler) *Router {
 	router := NewRouter()
 
 	router.AddGroup(
@@ -50,7 +50,7 @@ func InitRoutes() *Router {
 			{
 				Path:    "/create",
 				Method:  "POST",
-				Handler: handlers.CreateURL,
+				Handler: handler.CreateURL,
 			},
 		},
 	)
