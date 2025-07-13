@@ -78,12 +78,13 @@ func createDBConnection(config *config.Config) *pgxpool.Pool {
 	if err != nil {
 		log.Fatalf("Can not parse db config")
 	}
-	dbConfig.MaxConns = config.Database.MaxConns
-	dbConfig.MinConns = config.Database.MinConns
+	dbConfig.MaxConns = int32(config.Database.MaxConns)
+	dbConfig.MinConns = int32(config.Database.MinConns)
 	dbConfig.HealthCheckPeriod = 30 * time.Second
 	dbPool, err := pgxpool.NewWithConfig(ctx, dbConfig)
+	fmt.Printf("DB URL: %s", dbUrl)
 	if err != nil {
-		log.Fatalf("Can not open connection to datbase")
+		log.Fatalf("Can not open connection to datbase, %d", config.Database.MaxConns)
 	}
 
 	return dbPool

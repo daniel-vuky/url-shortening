@@ -1,6 +1,9 @@
 package services
 
 import (
+	"context"
+	"time"
+
 	"github.com/daniel-vuky/url-shortening/internal/config"
 	"github.com/daniel-vuky/url-shortening/internal/models"
 	"github.com/daniel-vuky/url-shortening/internal/storage/postgres"
@@ -33,7 +36,26 @@ func NewUrlService(querier postgres.Querier, shortener utils.Shortener, config *
 }
 
 func (s *URLService) CreateURL(requestParam *models.CreateURLRequest) (models.CreateURLResponse, error) {
-	return models.CreateURLResponse{}, nil
+	var expiresAt time.Time
+	if requestParam.ExpiresAt != nil {
+		expiresAt = *requestParam.ExpiresAt
+	} else {
+		expiresAt = time.Now().Add(365 * 24 * time.Hour) // hoặc giá trị mặc định bạn muốn
+	}
+	createUrlParams := postgres.CreateURLParams{
+		OriginalUrl: requestParam.OriginalURL,
+		ShortCode:   requestParam.ShortCode,
+		ExpiresAt:   expiresAt,
+	}
+	urlCreated, err := s.querier.CreateURL(context.Background(), createUrlParams)
+	if err != nil {
+		return models.CreateURLResponse{}, err
+	}
+	return models.CreateURLResponse{
+		ShortURL:    urlCreated.ShortCode,
+		OriginalURL: urlCreated.OriginalURL,
+		ExpiresAt:   &urlCreated.ExpiresAt.Time,
+	}, nil
 }
 
 func (s *URLService) GetURL(shortenCode string) (string, error) {

@@ -45,10 +45,10 @@ func InitRoutes(handler *handlers.Handler) *Router {
 	router := NewRouter()
 
 	router.AddGroup(
-		"/shorten",
+		"shorten",
 		[]Route{
 			{
-				Path:    "/create",
+				Path:    "create",
 				Method:  "POST",
 				Handler: handler.CreateURL,
 			},
