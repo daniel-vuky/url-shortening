@@ -35,6 +35,8 @@ func NewUrlService(querier postgres.Querier, shortener utils.Shortener, config *
 	}
 }
 
+// CreateURL
+// Receives url param and start to create the shortening
 func (s *URLService) CreateURL(requestParam *models.CreateURLRequest) (models.CreateURLResponse, error) {
 	var expiresAt time.Time
 	if requestParam.ExpiresAt != nil {
@@ -53,6 +55,7 @@ func (s *URLService) CreateURL(requestParam *models.CreateURLRequest) (models.Cr
 	}
 	return models.CreateURLResponse{
 		ShortURL:    urlCreated.ShortCode,
+		ShortCode:   urlCreated.ShortCode,
 		OriginalURL: urlCreated.OriginalURL,
 		ExpiresAt:   &urlCreated.ExpiresAt.Time,
 	}, nil

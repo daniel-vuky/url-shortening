@@ -19,10 +19,10 @@ type URL struct {
 }
 
 type CreateURLRequest struct {
-	OriginalURL string     `json:"original_url"`
-	ShortCode   string     `json:"short_code,omitempty"`
-	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
-	UserID      *string    `json:"user_id,omitempty"`
+	OriginalURL string     `json:"original_url" validate:"required,url"`
+	ShortCode   string     `json:"short_code,omitempty" validate:"omitempty,alphanum,min=3,max=10"`
+	ExpiresAt   *time.Time `json:"expires_at,omitempty" validate:"omitempty"`
+	UserID      *string    `json:"user_id,omitempty" validate:"omitempty,numeric"`
 }
 
 type CreateURLResponse struct {

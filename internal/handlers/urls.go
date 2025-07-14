@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/daniel-vuky/url-shortening/internal/models"
+	"github.com/go-playground/validator/v10"
 )
 
 func (h *Handler) CreateURL(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +34,11 @@ func (h *Handler) CreateURL(w http.ResponseWriter, r *http.Request) {
 		ShortCode:   r.FormValue("short_code"),
 		ExpiresAt:   expiresAt,
 		UserID:      userID,
+	}
+
+	if err := validator.New().Struct(requestParam); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	response, err := h.service.CreateURL(requestParam)
