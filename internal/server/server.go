@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/daniel-vuky/url-shortening/internal/config"
@@ -19,39 +16,35 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func StartServer(port int) {
-	config, err := config.LoadConfig()
-	if err != nil {
-		log.Fatal("Failed to load the server config")
-	}
+type Server struct {
+	cfg    *config.Config
+	server *http.Server
+	db     *pgxpool.Pool
+}
 
-	dbConnection := createDBConnection(config)
-	defer dbConnection.Close()
-
-	appHandlers := createHandler(dbConnection, config)
-	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+func NewServer(cfg *config.Config) *Server {
+	dbConnection := createDBConnection(cfg)
+	appHandlers := createHandler(dbConnection, cfg)
+	httpServer := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
 		Handler: routes.InitRoutes(appHandlers).GetMux(),
 	}
 
-	go func() {
-		fmt.Println("Starting server on port", port)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Failed to start server: %v", err)
-		}
-	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutting down server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Failed to shutdown server: %v", err)
+	return &Server{
+		cfg:    cfg,
+		server: httpServer,
+		db:     dbConnection,
 	}
+}
+
+func (s *Server) Start() error {
+	log.Printf("Starting server on port %d", s.cfg.Server.Port)
+	return s.server.ListenAndServe()
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	s.db.Close()
+	return s.server.Shutdown(ctx)
 }
 
 func createHandler(db *pgxpool.Pool, config *config.Config) *handlers.Handler {
@@ -82,8 +75,7 @@ func createDBConnection(config *config.Config) *pgxpool.Pool {
 	dbConfig.MinConns = int32(config.Database.MinConns)
 	dbConfig.HealthCheckPeriod = 30 * time.Second
 	dbPool, err := pgxpool.NewWithConfig(ctx, dbConfig)
-	fmt.Printf("DB URL: %s", dbUrl)
-	if err != nil {
+	if err != nil || dbPool.Ping(ctx) != nil {
 		log.Fatalf("Can not open connection to datbase, %d", config.Database.MaxConns)
 	}
 

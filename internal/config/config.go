@@ -1,8 +1,6 @@
 package config
 
 import (
-	"sync"
-
 	"github.com/spf13/viper"
 )
 
@@ -26,22 +24,18 @@ type Config struct {
 // LoadConfig loads the config from the env.yaml file
 func LoadConfig() (*Config, error) {
 	var config Config
-	var once sync.Once
-	var configErr error
-	once.Do(func() {
-		viper.SetConfigName("env")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath(".")
-		configErr = viper.ReadInConfig()
-		if configErr != nil {
-			return
-		}
+	viper.SetConfigName("env")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		return nil, err
+	}
 
-		configErr = viper.Unmarshal(&config)
-		if configErr != nil {
-			return
-		}
-	})
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		return nil, err
+	}
 
-	return &config, configErr
+	return &config, nil
 }
